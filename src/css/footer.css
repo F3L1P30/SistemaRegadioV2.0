@@ -1,0 +1,15 @@
+.footer {
+  background-color: #ffffff;
+  padding: 10px;
+  color: #ffffff;
+  text-align: center;
+  display: flex;
+  justify-content: flex-start; /* Alinea el contenido al comienzo (izquierda) */
+  align-items: center; /* Centra verticalmente el contenido */
+}
+
+/* Estilo para el logotipo */
+.logo {
+  max-width: 110px; /* Ajusta el tamaño del logotipo según tus preferencias */
+  margin-top: 10px; /* Ajusta el margen superior según lo necesites */
+}

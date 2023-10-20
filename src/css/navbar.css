@@ -1,0 +1,61 @@
+/* Estilos para el menú vertical */
+.vertical-navbar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 270px; /* Ancho del menú */
+  background-color: #333; /* Color de fondo del menú */
+  overflow-y: auto; /* Agrega desplazamiento vertical si es necesario */
+  padding: 3em;
+}
+
+/* Estilos para los enlaces en el menú vertical */
+.vertical-navbar a {
+  color: #fff;
+  padding: 8px 20px; /* Ajusta el padding vertical para ocupar más espacio */
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: bold; /* Texto en negrita */
+  font-family: 'Arial', sans-serif; /* Cambia la fuente de letra */
+  display: flex;
+  align-items: center; /* Centra verticalmente el contenido */
+  transition: color 0.3s; /* Transición para el cambio de color */
+}
+
+/* Estilos para cambiar el color al pasar el mouse */
+.vertical-navbar a:hover {
+  color: #007bff; /* Color azul al pasar el mouse */
+}
+
+/* Estilos para el enlace activo */
+.vertical-navbar a.active {
+  color: #007bff; /* Color azul del enlace activo */
+}
+
+/* Estilos para los iconos */
+.nav-link .icon {
+  margin-right: 10px;
+}
+
+/* Estilos para el menú desplegable */
+.dropdown-menu {
+  background-color: #fb1717;
+  color: #e80909;
+}
+
+/* Estilos para los elementos del menú desplegable */
+.dropdown-item {
+  padding: 10px 20px;
+}
+
+/* Estilos para los iconos dentro del menú desplegable */
+.dropdown-item .icon {
+  margin-right: 10px;
+}
+
+/* Estilos para el menú desplegable personalizado */
+.dropdown-menu-custom {
+  background-color: #007bff !important; /* Fondo azul */
+  color: #fff; /* Texto blanco */
+}

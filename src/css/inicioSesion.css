@@ -1,0 +1,67 @@
+/* Estilo para el contenedor del formulario */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    background-image: url('https://img1.wallspic.com/crops/0/0/7/6/46700/46700-campo_de_hierba_verde_bajo_un_cielo_azul_y_nubes_blancas_durante_el_dia-1920x1080.jpg');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  
+  /* Pseudo-elemento para aplicar el desenfoque a toda la imagen de fondo */
+  .login-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://img1.wallspic.com/crops/0/0/7/6/46700/46700-campo_de_hierba_verde_bajo_un_cielo_azul_y_nubes_blancas_durante_el_dia-1920x1080.jpg');
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+  }
+  
+  /* Estilo para la tarjeta del formulario */
+  .card-container {
+    border: none;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    width: 450px !important;
+    height: 450px !important;
+    background-color: rgba(255, 255, 255, 0);
+    text-align: center;
+  }
+  
+  /* Estilo para el contenedor del logotipo */
+  .logo-container {
+    margin-bottom: 30px;
+  }
+  
+  /* Estilo para la imagen del logotipo */
+  .logo {
+    width: 200px !important;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  /* Estilo para los campos de entrada de texto */
+  .form-control {
+    border: none;
+    border-bottom: 2px solid #8f0a9800;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  
+  /* Estilo para los mensajes de error */
+  .is-invalid {
+    border-color: #d9534f !important;
+  }
+  
+  /* Estilo para el botón de inicio de sesión */
+  .btn-primary {
+    background-color: #008000 !important;
+    border-color: #008000 !important;
+  }
+  

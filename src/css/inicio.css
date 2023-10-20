@@ -1,0 +1,24 @@
+/* letras.css */
+
+/* Estilo para la sección principal */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50vh; /* Ajusta la altura de acuerdo a tus preferencias (50% del alto de la ventana) */
+  }
+  
+  /* Estilo para el mensaje de bienvenida */
+  .titleI {
+    font-size: 54px; /* Tamaño de fuente deseado */
+    font-weight: bold; /* Fuente en negrita */
+    color: #149329; /* Color de texto deseado */
+  }
+  
+  /* Estilo para el párrafo de agradecimiento */
+  .message {
+    font-size: 20px; /* Tamaño de fuente deseado */
+    color: #666; /* Color de texto deseado */
+  }
+  
