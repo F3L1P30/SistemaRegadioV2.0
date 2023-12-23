@@ -10,10 +10,12 @@ export function GraficoMedidor({ medidorSeleccionado }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [anteriorFirstData, setAnteriorFirstData] = useState(0);
+  const [selectedMetric, setSelectedMetric] = useState('');
+  const [availableMetrics, setAvailableMetrics] = useState([]);
 
   const fetchData = async (startDate, endDate) => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/medidor', {
+      const response = await axios.get(`${process.env.REACT_APP_URL_HTTPS}medidor`, {
         params: {
           startDate: startDate,
           endDate: endDate // Utiliza la fecha final ajustada
@@ -33,6 +35,7 @@ export function GraficoMedidor({ medidorSeleccionado }) {
       }).filter(item => item !== null);
       
       setDataArr(newData);
+
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }
@@ -48,16 +51,18 @@ export function GraficoMedidor({ medidorSeleccionado }) {
       let lastIndexBeforeStartDate = -1;
       for (let i = 0; i < dataArr.length; i++) {
         const itemDate = new Date(dataArr[i].fecha).getTime();
-        if (itemDate < startDateTime && itemDate >= endDateTime && dataArr[i].id_medidor === medidorSeleccionado) {
+        if (itemDate < startDateTime && dataArr[i].id_medidor === medidorSeleccionado) {
           lastIndexBeforeStartDate = i;
         }
       }
-  
+
       // Si se encontró un dato antes de startDate para el medidor seleccionado, cópialo en anteriorFirstData
       if (lastIndexBeforeStartDate !== -1) {
         const consumoAnteriorFirstData = JSON.parse(dataArr[lastIndexBeforeStartDate].otro_dato);
+        console.log("consumoAnteriorFirstData: ",consumoAnteriorFirstData);
         setAnteriorFirstData(consumoAnteriorFirstData.consumo);
       } else {
+        console.log("consumoAnteriorFirstData: no existe");
         setAnteriorFirstData(0); // Si no se encontró ningún dato antes de startDate, establece 0
       }
   
@@ -66,6 +71,16 @@ export function GraficoMedidor({ medidorSeleccionado }) {
       const interval = setInterval(() => {
         fetchData(startDate, endDate);
       }, 5000);
+
+      // Identificar y almacenar las métricas disponibles
+      const metricsSet = new Set();
+      filteredData.forEach((item) => {
+        const otroDatoJSON = JSON.parse(item.otro_dato);
+        Object.keys(otroDatoJSON).forEach((metric) => {
+          metricsSet.add(metric);
+        });
+      });
+      setAvailableMetrics(Array.from(metricsSet));
   
       return () => {
         clearInterval(interval);
@@ -89,7 +104,6 @@ export function GraficoMedidor({ medidorSeleccionado }) {
 
   const otroDatoArray = filteredData.map(item => {
     const otroDatoJSON = JSON.parse(item.otro_dato);
-  
     // Recopilar todos los campos de otro_dato en un objeto
     const fields = [];
     for (const key in otroDatoJSON) {
@@ -104,19 +118,25 @@ export function GraficoMedidor({ medidorSeleccionado }) {
     return fields;
   });
 
+  const handleMetricChange = (event) => {
+    setSelectedMetric(event.target.value);
+  };
+
   const datasets = otroDatoArray.reduce((result, fields) => {
     fields.forEach((fieldObj) => {
-      const dataset = result.find((ds) => ds.label === fieldObj.field);
-      if (dataset) {
-        dataset.data.push(fieldObj.value);
-      } else {
-        result.push({
-          label: fieldObj.field,
-          data: [fieldObj.value],
-          borderColor: 'rgba(75, 192, 192, 1)',
-          fill: false,
-          tension: 0.2,
-        });
+      if (fieldObj.field === selectedMetric) {
+        const dataset = result.find((ds) => ds.label === fieldObj.field);
+        if (dataset) {
+          dataset.data.push(fieldObj.value);
+        } else {
+          result.push({
+            label: fieldObj.field,
+            data: [fieldObj.value],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            fill: false,
+            tension: 0.2,
+          });
+        }
       }
     });
     return result;
@@ -150,6 +170,14 @@ export function GraficoMedidor({ medidorSeleccionado }) {
       },
       scales: {
         x: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Eje X: Fechas',
+            font: {
+              weight: 'bold',
+            },
+          },
           ticks: {
             callback: (value, index, values) => {
               if (index === 0) {
@@ -165,7 +193,17 @@ export function GraficoMedidor({ medidorSeleccionado }) {
               }
             }
           }
-        }
+        },
+        y: {
+          display: true,
+          title: {
+            display: true,
+            text: `Eje Y: ${selectedMetric}`,
+            font: {
+              weight: 'bold',
+            },
+          },
+        },
       }
     };
   }, [startDate, endDate]);
@@ -178,17 +216,32 @@ export function GraficoMedidor({ medidorSeleccionado }) {
   
   return (
     <div>
-      <p>Gráfico Medidor</p>
-      <div>
-        <label htmlFor="start-date">Fecha y hora inicial: </label>
-        <input type="datetime-local" id="start-date" onChange={e => handleDateChange(e, 'start')} />
-      </div>
-      <div>
-        <label htmlFor="end-date">Fecha y hora final: </label>
-        <input type="datetime-local" id="end-date" onChange={e => handleDateChange(e, 'end')} />
+      <h1 className="title">Gráfico Medidor</h1>
+      <div className="row justify-content-center">
+        <div className="col-md-2">
+            <div className="form-group mb-2">
+              <label htmlFor="start-date">Fecha y hora inicial: </label>
+              <input type="datetime-local" id="start-date" className="form-control" onChange={e => handleDateChange(e, 'start')} /> {/* Agregar clase 'form-control' para estilos de formulario */}
+            </div>
+            <div className="form-group mb-2">
+              <label htmlFor="end-date">Fecha y hora final: </label>
+              <input type="datetime-local" id="end-date" className="form-control" onChange={e => handleDateChange(e, 'end')} />
+            </div>
+            <div className="form-group mb-2">
+              <label htmlFor="metric-select">Métrica:</label>
+              <select id="metric-select" className="form-control" onChange={handleMetricChange} value={selectedMetric}>
+                <option value="">Seleccionar una métrica</option>
+                {availableMetrics.map((metric) => (
+                  <option key={metric} value={metric}>
+                    {metric}
+                  </option>
+                ))}
+              </select>
+            </div>
+        </div>
       </div>
       <Line data={chartData} options={chartOptions} />
-      <table className="table table-striped table-bordered">
+      <table className="table table-striped table-bordered mt-4">
         <thead>
           <tr>
             <th>Energía Consumida en el tiempo seleccionado</th>

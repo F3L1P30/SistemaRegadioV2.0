@@ -6,6 +6,7 @@ import Inicio from './Inicio';
 import Medidor from './Medidor';
 import Contacto from './Contacto';
 import Geo from './Geo';
+import Valvula from './Valvula';
 import InicioSesion from './InicioSesion';
 import Perfil from './Perfil';
 import Administrador from './Administrador';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/Medidor" element={<ProtectedRoute element={<Medidor />} />} />
         <Route path="/Contacto" element={<ProtectedRoute element={<Contacto />} />} />
         <Route path="/Geo" element={<ProtectedRoute element={<Geo />} />} />
+        <Route path="/Valvula" element={<ProtectedRoute element={<Valvula />} />} />
         <Route path="/Perfil" element={<ProtectedRoute element={<Perfil />} />} />
         <Route path="/Administrador" element={<ProtectedRoute element={<Administrador />} />} />
         <Route path="/RegistrarUsuario" element={<ProtectedRoute element={<RegistrarUsuario />} />} />

@@ -14,6 +14,7 @@ export default function App({ listaMedidores }) {
   const [zoom, setZoom] = useState(9);
   const [geolocationAllowed, setGeolocationAllowed] = useState(false);
   const [medidor, setMedidor] = useState([]);
+  
 
   useEffect(() => {
     // Convierte la lista de medidores en una matriz de coordenadas [lng, lat]
@@ -32,25 +33,21 @@ export default function App({ listaMedidores }) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v12",
-        center: [lng, lat],
-        zoom: zoom,
+        zoom: zoom, // Mantén el zoom inicial
       });
-
+  
       map.current.on("move", () => {
         setLng(map.current.getCenter().lng.toFixed(4));
         setLat(map.current.getCenter().lat.toFixed(4));
         setZoom(map.current.getZoom().toFixed(2));
       });
-
+  
       // Obtener la ubicación actual del usuario usando la API de geolocalización del navegador
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const newUserLocation = [position.coords.longitude, position.coords.latitude];
           setGeolocationAllowed(true);
-          setLng(newUserLocation[0]);
-          setLat(newUserLocation[1]);
-          map.current.setCenter(newUserLocation);
-
+  
           new mapboxgl.Marker({ element: createUserMarkerElement(), offset: [0, -10] })
             .setLngLat(newUserLocation)
             .addTo(map.current)
@@ -59,11 +56,9 @@ export default function App({ listaMedidores }) {
         (error) => {
           console.error("Error al obtener la ubicación:", error);
           setGeolocationAllowed(false);
-        }
-      );
-      
+        });
     }
-  }, [lat, lng, zoom]);
+  }, [zoom]);
 
   useEffect(() => {
     // Se eliminan los marcadores anteriores para que no se sobreescriban, excepto la ubicacion del usuario
@@ -99,20 +94,24 @@ export default function App({ listaMedidores }) {
   }, [medidor, listaMedidores]);
 
   useEffect(() => {
+    let hasCenteredOnUser = false;
+
     // Actualizar la ubicación en tiempo real usando watchPosition
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const newUserLocation = [position.coords.longitude, position.coords.latitude];
-        setLng(newUserLocation[0]);
-        setLat(newUserLocation[1]);
-        map.current.setCenter(newUserLocation);
+        if (!hasCenteredOnUser) {
+          // Centrar en la ubicación del usuario solo la primera vez
+          map.current.setCenter(newUserLocation);
+          hasCenteredOnUser = true; // Actualizar el estado para indicar que ya se ha centrado
+        }
       },
       (error) => {
         console.error("Error al obtener la ubicación:", error);
         setGeolocationAllowed(false);
       }
     );
-
+  
     // Detener la observación de la ubicación cuando el componente se desmonte
     return () => {
       navigator.geolocation.clearWatch(watchId);

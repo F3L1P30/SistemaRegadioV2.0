@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import NavBare from './Menu';
-import Footer from './Footer';
 import Mapa from './Mapa';
 import axios from 'axios';
 
@@ -10,13 +9,13 @@ function Geo() {
   const [medidorSeleccionado, setMedidorSeleccionado] = useState('');
   const usuario = JSON.parse(localStorage.getItem('authUser'));
   const idSistemaUsuario = usuario.id_sistema;
+  const [userLocation, setUserLocation] = useState(null);
 
   const tiposMedidores = [...new Set(listaMedidores.map(medidor => medidor.tipo_medidor))];
 
   useEffect(() => {
-    // Realiza una solicitud HTTP GET al backend para obtener los datos de los medidores
     axios
-      .get('http://127.0.0.1:8000/medidores')
+      .get(`${process.env.REACT_APP_URL_HTTPS}medidores`)
       .then((response) => {
         // Dividir la respuesta en líneas y filtrar líneas vacías
         const lines = response.data.split('\n').filter((line) => line.trim() !== '');
@@ -38,6 +37,25 @@ function Geo() {
         setListaMedidores(medidoresFiltrados);
       })
       .catch((error) => console.error('Error al obtener la lista de medidores:', error));
+
+    // Configurar el observador de geolocalización
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        // Actualizar la ubicación del usuario en el estado
+        setUserLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.error('Error al obtener la ubicación:', error);
+      }
+    );
+
+    // Limpiar el observador cuando el componente se desmonta
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, [idSistemaUsuario]);
 
   const handleTipoMedidorChange = (event) => {
@@ -57,36 +75,42 @@ function Geo() {
       <main className="content">
         <div className="container text-center">
           <h1 className="title">Geolocalización</h1>
-          <div>
-            <label htmlFor="tipoMedidor">Seleccione un tipo de medidor:</label>
-            <select id="tipoMedidor" value={tipoMedidorSeleccionado} onChange={handleTipoMedidorChange}>
-              <option value="">Todos los tipos</option>
-              {tiposMedidores.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
-              ))}
-            </select>
+          <div className="row justify-content-center">
+            <div className="col-md-3">
+              <div className="form-group mb-2">
+                <label htmlFor="tipoMedidor">Seleccione un tipo de medidor:</label>
+                <select className="form-control" id="tipoMedidor" value={tipoMedidorSeleccionado} onChange={handleTipoMedidorChange}>
+                  <option value="">Todos los tipos</option>
+                  {tiposMedidores.map((tipo) => (
+                    <option key={tipo} value={tipo}>
+                      {tipo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group mb-2">
+                <label htmlFor="medidor">Seleccione un medidor:</label>
+                <select className="form-control" id="medidor" value={medidorSeleccionado} onChange={handleMedidorChange}>
+                  <option value="">Todos los medidores</option>
+                  {listaMedidores
+                    .filter((medidor) => !tipoMedidorSeleccionado || medidor.tipo_medidor === tipoMedidorSeleccionado)
+                    .map((medidor) => (
+                      <option key={medidor.id_medidor} value={medidor.id_medidor}>
+                        {medidor.id_medidor}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
           </div>
-          <div>
-            <label htmlFor="medidor">Seleccione un medidor:</label>
-            <select id="medidor" value={medidorSeleccionado} onChange={handleMedidorChange}>
-              <option value="">Todos los medidores</option>
-              {listaMedidores
-                .filter((medidor) => !tipoMedidorSeleccionado || medidor.tipo_medidor === tipoMedidorSeleccionado)
-                .map((medidor) => (
-                  <option key={medidor.id_medidor} value={medidor.id_medidor}>
-                    {medidor.id_medidor}
-                  </option>
-                ))}
-            </select>
-          </div>
+          
           <Mapa
             listaMedidores={listaMedidores.filter(
               (medidor) =>
                 (!tipoMedidorSeleccionado || medidor.tipo_medidor === tipoMedidorSeleccionado) &&
                 (!medidorSeleccionado || medidor.id_medidor === medidorSeleccionado)
             )}
+            userLocation={userLocation}
           />
         </div>
       </main>

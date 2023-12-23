@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import NavBare from './Menu';
-import Footer from './Footer';
 import './css/medidor.css';
 import { TablaMedidor } from './TablaMedidor';
 import { GraficoMedidor } from './GraficoMedidor';
@@ -18,8 +17,7 @@ function Medidor() {
   };
 
   useEffect(() => {
-    // Realiza una solicitud HTTP GET al backend para obtener los datos de los medidores
-    axios.get('http://127.0.0.1:8000/medidores')
+    axios.get(`${process.env.REACT_APP_URL_HTTPS}medidores`)
       .then(response => {
         // Dividir la respuesta en líneas y filtrar líneas vacías
         const lines = response.data.split('\n').filter(line => line.trim() !== '');
@@ -50,25 +48,31 @@ function Medidor() {
       </header>
       <main className="content">
         <div className="container text-center">
-          <div className="row justify-content-center">
-            <h1 className="title">Medidores</h1>
+          
+            <h1 className="title">Medidor</h1>
             
             {/* Selector de Medidores */}
-            <select onChange={handleMedidorChange} value={medidorSeleccionado} className="custom-select">
-              <option value="">Selecciona un medidor</option>
-              {listaMedidores.map((medidor) => (
-                <option key={medidor.id_medidor} value={medidor.id_medidor}>
-                  Medidor {medidor.id_medidor} del {medidor.id_sistema}
-                </option>
-              ))}
-            </select>
-            
+            <div className="row justify-content-center">
+              <div className="col-md-3">
+                <div className="form-group mb-2">
+                  <label htmlFor="tipoMedidor">Selecciona un medidor:</label>
+                  <select onChange={handleMedidorChange} value={medidorSeleccionado} className="form-control ">
+                    <option value="">Selecciona un medidor</option>
+                    {listaMedidores.map((medidor) => (
+                      <option key={medidor.id_medidor} value={medidor.id_medidor}>
+                        Medidor {medidor.id_medidor} de {medidor.tipo_medidor}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
             {/* Componente TablaMedidor */}
             <TablaMedidor medidorSeleccionado={medidorSeleccionado} />
             
             {/* Componente GraficoMedidor */}
             <GraficoMedidor medidorSeleccionado={medidorSeleccionado} />
-          </div>
+          
         </div>
       </main>
     </div>

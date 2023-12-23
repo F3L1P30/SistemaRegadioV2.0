@@ -13,7 +13,7 @@ const InicioSesion = () => {
   const [passwordError, setPasswordError] = useState(false);
 
   const handleLogin = async () => {
-    try {
+    try{
       // Validación de campos
       if (correo.trim() === '') {
         setCorreoError('Debe completar este campo');
@@ -25,10 +25,12 @@ const InicioSesion = () => {
       }
 
       // Enviar solicitud POST al endpoint de inicio de sesión
-      const response = await axios.post('http://localhost:8000/iniciarSesion', {
+      const response = await axios.post(`${process.env.REACT_APP_URL_HTTPS}iniciarSesion`, {
         correo,
         password,
       });
+      
+      console.log(response);
 
       if (response.status === 200) {
         const data = response.data;

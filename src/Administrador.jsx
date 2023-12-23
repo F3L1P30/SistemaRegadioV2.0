@@ -9,14 +9,27 @@ function Administrador() {
             <header>
                 <NavBare className="navbar-footer" />
             </header>
-            <div className='text-center'>
-                <h2>Administrador</h2>
-            </div>
-            
-            <Link to="/Inicio" className="btn btn-primary">Volver a Inicio</Link>
-            <Link to="/RegistrarUsuario" className="btn btn-primary">Registrar Usuario</Link>
-            <Link to="/GestionarUsuarios" className="btn btn-primary">Gestionar Usuarios</Link>
+            <main className="content">
+                <div className="container text-center">
+                    <div className="mb-3">
+                        <h2 className="title">Administrador</h2>
+                    </div>
 
+                    <div className="row justify-content-center">
+                        <div className="col-md-7">
+                            <div className="mb-3">
+                                <Link to="/RegistrarUsuario" className="btn btn-primary btn-block" style={{ width: '50%' }}>Registrar Usuario</Link>
+                            </div>
+                            <div className="mb-3">
+                                <Link to="/GestionarUsuarios" className="btn btn-primary btn-block" style={{ width: '50%' }}>Gestionar Usuarios</Link>
+                            </div>
+                            <div className="mb-3">
+                                <Link to="/Inicio" className="btn btn-secondary btn-block" style={{ width: '50%' }}>Volver al Inicio</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </main>
             <footer>
                 <Footer />
             </footer>

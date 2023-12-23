@@ -1,31 +1,50 @@
 const express = require("express");
 const mysql = require("mysql");
-const app = express();
+const cors = require("cors");
+const bcrypt = require('bcrypt');
 const PORT = 8000;
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  port: '3307',
-  database: 'modbus'
-});
+const https = require('https');
+const http = require('http');
+const fs = require('fs');
 
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('¡Conexión establecida exitosamente!');
-});
+const app = express();
+app.use(cors());
 
 app.use(express.json());
+app.use(cors()); // Habilita CORS para permitir solicitudes desde otros dominios.
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
+// Configuración del pool de conexiones
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'prueba',
+  password: '123456',
+  port: '3306',
+  database: 'modbus',
+  connectionLimit: 10 // Número máximo de conexiones en el pool
 });
 
-//medidor
+
+// Middleware para manejar errores de conexión
+pool.on('error', (err) => {
+  console.error('Error en el pool de conexiones:', err);
+});
+
+// Función para ejecutar consultas SQL con promesas
+function queryPromise(query, params) {
+  return new Promise((resolve, reject) => {
+    pool.query(query, params, (error, results) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+}
+
+
+// medidor
 app.get('/medidor', (req, res) => {
   // Configura una conexión SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -34,20 +53,24 @@ app.get('/medidor', (req, res) => {
   res.flushHeaders();
 
   // Escucha los cambios en la base de datos y envía actualizaciones SSE al cliente
-  const query = connection.query("SELECT * FROM medidor");
-  query.stream().on('data', (row) => {
-    const eventData = `data: ${JSON.stringify(row)}\n\n`;
-    res.write(eventData);
-  }).on('end', () => {
-    res.end();
-  });
+  const query = pool.query("SELECT * FROM medidor");
+  query
+    .stream()
+    .on('data', (row) => {
+      const eventData = `data: ${JSON.stringify(row)}\n\n`;
+      res.write(eventData);
+    })
+    .on('end', () => {
+      res.end();
+    });
 });
 
 app.post('/medidor', (req, res) => {
   const datos = req.body;
   datos.otro_dato = JSON.stringify(datos.otro_dato);
   // Insertar los datos en la tabla medidor
-  connection.query('INSERT INTO medidor SET ?', datos, (error, results) => {
+  const insertQuery = 'INSERT INTO medidor SET ?';
+  pool.query(insertQuery, datos, (error, results) => {
     if (error) {
       console.error('Error al insertar los datos medidor de agua:', error);
       res.status(500).json({ mensaje: 'Error al insertar los datos medidor de agua' });
@@ -56,7 +79,8 @@ app.post('/medidor', (req, res) => {
       res.json({ mensaje: 'Datos medidor de agua insertados correctamente' });
 
       // Actualizar el valor del contador de autoincremento
-      connection.query('ALTER TABLE medidor AUTO_INCREMENT = ?', [results.insertId + 1], (error, results) => {
+      const updateQuery = 'ALTER TABLE medidor AUTO_INCREMENT = ?';
+      pool.query(updateQuery, [results.insertId + 1], (error, results) => {
         if (error) {
           console.error('Error al actualizar el contador de autoincremento:', error);
         } else {
@@ -69,11 +93,7 @@ app.post('/medidor', (req, res) => {
   console.log('Datos medidor de agua recibidos:', datos);
 });
 
-
-
-
-//Medidores
-
+// Medidores
 app.get('/medidores', (req, res) => {
   // Configura una conexión SSE
   res.setHeader('Content-Type', 'text/event-stream');
@@ -82,13 +102,16 @@ app.get('/medidores', (req, res) => {
   res.flushHeaders();
 
   // Escucha los cambios en la base de datos y envía actualizaciones SSE al cliente
-  const query = connection.query("SELECT * FROM medidores");
-  query.stream().on('data', (row) => {
-    const eventData = `data: ${JSON.stringify(row)}\n\n`;
-    res.write(eventData);
-  }).on('end', () => {
-    res.end();
-  });
+  const query = pool.query("SELECT * FROM medidores");
+  query
+    .stream()
+    .on('data', (row) => {
+      const eventData = `data: ${JSON.stringify(row)}\n\n`;
+      res.write(eventData);
+    })
+    .on('end', () => {
+      res.end();
+    });
 });
 
 app.post('/medidores', (req, res) => {
@@ -96,7 +119,8 @@ app.post('/medidores', (req, res) => {
   const id_medidor = datos.id_medidor; // Obtén el valor de id_medidor de los datos recibidos
 
   // Verifica si el valor de id_medidor ya existe en la tabla medidores
-  connection.query('SELECT id_medidor FROM medidores WHERE id_medidor = ?', id_medidor, (error, results) => {
+  const selectQuery = 'SELECT id_medidor FROM medidores WHERE id_medidor = ?';
+  pool.query(selectQuery, id_medidor, (error, results) => {
     if (error) {
       console.error('Error al verificar la existencia del medidor:', error);
       res.status(500).json({ mensaje: 'Error al verificar la existencia del medidor' });
@@ -110,7 +134,8 @@ app.post('/medidores', (req, res) => {
         console.log('Datos del medidor recibidos:', datos);
 
         // Insertar los datos en la tabla medidores
-        connection.query('INSERT INTO medidores SET ?', datos, (error, results) => {
+        const insertQuery = 'INSERT INTO medidores SET ?';
+        pool.query(insertQuery, datos, (error, results) => {
           if (error) {
             console.error('Error al insertar los datos del medidor:', error);
             res.status(500).json({ mensaje: 'Error al insertar los datos del medidor' });
@@ -128,7 +153,8 @@ app.delete('/medidores/:id', (req, res) => {
   const id = req.params.id;
 
   // Realizar la eliminación en la base de datos
-  const query = connection.query('DELETE FROM medidores WHERE id_medidor = ?', id, (error, results) => {
+  const deleteQuery = 'DELETE FROM medidores WHERE id_medidor = ?';
+  pool.query(deleteQuery, id, (error, results) => {
     if (error) {
       console.error('Error al eliminar los datos del medidor:', error);
       res.status(500).json({ mensaje: 'Error al eliminar los datos del medidor' });
@@ -141,26 +167,10 @@ app.delete('/medidores/:id', (req, res) => {
   console.log('ID del medidor recibido:', id);
 });
 
-
-//USUARIO
-const bcrypt = require('bcrypt');
-
-// Función para ejecutar consultas SQL con promesas
-function queryPromise(query, params) {
-  return new Promise((resolve, reject) => {
-    connection.query(query, params, (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
-}
-
-//obtener el usuario de la base de datos
+// Usuarios
+// Obtener usuarios de la base de datos
 app.get('/usuario', (req, res) => {
-  const query = connection.query('SELECT nombre, apellidos, correo, rol, id_sistema FROM usuario');
+  const query = pool.query('SELECT nombre, apellidos, correo, rol, id_sistema FROM usuario');
   query.stream().on('data', (row) => {
     const eventData = `data: ${JSON.stringify(row)}\n\n`;
     res.write(eventData);
@@ -205,7 +215,7 @@ app.post('/iniciarSesion', async (req, res) => {
 
 // Endpoint para agregar un nuevo usuario
 app.post('/registrarUsuario', async (req, res) => {
-  const { nombre, apellidos, correo, password, rol } = req.body;
+  const { nombre, apellidos, correo, password, rol, id_sistema } = req.body;
 
   try {
     // Verifica si el correo ya existe en la tabla usuario
@@ -223,7 +233,7 @@ app.post('/registrarUsuario', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Insertar los datos en la tabla usuario, incluyendo la contraseña encriptada
-      const newUser = { nombre, apellidos, correo, password: hashedPassword, rol };
+      const newUser = { nombre, apellidos, correo, password: hashedPassword, rol, id_sistema };
       const insertUserQuery = 'INSERT INTO usuario SET ?';
       await queryPromise(insertUserQuery, newUser);
 
@@ -243,7 +253,7 @@ app.delete('/eliminarUsuario/:correo', async (req, res) => {
   try {
     // Verificar si el usuario existe en la base de datos
     const existingUser = await new Promise((resolve, reject) => {
-      connection.query('SELECT correo FROM usuario WHERE correo = ?', correo, (error, results) => {
+      pool.query('SELECT correo FROM usuario WHERE correo = ?', correo, (error, results) => {
         if (error) {
           reject(error);
         } else {
@@ -259,7 +269,7 @@ app.delete('/eliminarUsuario/:correo', async (req, res) => {
     }
 
     // Realizar la eliminación en la base de datos
-    const query = connection.query('DELETE FROM usuario WHERE correo = ?', correo, (error, results) => {
+    const query = pool.query('DELETE FROM usuario WHERE correo = ?', correo, (error, results) => {
       if (error) {
         console.error('Error al eliminar los datos del usuario:', error);
         res.status(500).json({ mensaje: 'Error al eliminar los datos del usuario' });
@@ -284,7 +294,7 @@ app.put('/actualizarUsuario/:correo', async (req, res) => {
   try {
     // Verificar si el usuario existe en la base de datos
     const existingUser = await new Promise((resolve, reject) => {
-      connection.query('SELECT correo FROM usuario WHERE correo = ?', correo, (error, results) => {
+      pool.query('SELECT correo FROM usuario WHERE correo = ?', correo, (error, results) => {
         if (error) {
           reject(error);
         } else {
@@ -315,7 +325,7 @@ app.put('/actualizarUsuario/:correo', async (req, res) => {
     }
 
     // Actualizar los datos del usuario en la base de datos
-    const query = connection.query('UPDATE usuario SET ? WHERE correo = ?', [updatedUserData, correo], (error, results) => {
+    const query = pool.query('UPDATE usuario SET ? WHERE correo = ?', [updatedUserData, correo], (error, results) => {
       if (error) {
         console.error('Error al actualizar los datos del usuario:', error);
         res.status(500).json({ mensaje: 'Error al actualizar los datos del usuario' });
@@ -330,8 +340,17 @@ app.put('/actualizarUsuario/:correo', async (req, res) => {
   }
 });
 
-app.listen(
-  PORT,
-  () => console.log(`¡Hola, estoy vivo y me conecté a http://localhost:${PORT}`)
-);
+// Listen both http & https ports
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer({
+  key: fs.readFileSync('/etc/letsencrypt/live/tryallregadio.dyndns.org/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/tryallregadio.dyndns.org/fullchain.pem'),
+}, app);
 
+httpServer.listen(8000, () => {
+    console.log('HTTP Server running on port 8000');
+});
+
+httpsServer.listen(8002, () => {
+    console.log('HTTPS Server running on port 8002');
+});

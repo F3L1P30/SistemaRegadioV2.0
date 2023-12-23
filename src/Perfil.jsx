@@ -1,31 +1,35 @@
-import React, { useState, useEffect } from 'react';
+
+import { useAuth } from './AuthContext';
+import React from 'react';
 import Menu from './Menu';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 
 function Perfil() {
-    const [usuario, setUsuario] = useState(null);
-  
-    useEffect(() => {
-      // Obtener el usuario almacenado en localStorage
-      const usuarioAlmacenado = JSON.parse(localStorage.getItem('authUser'));
-      if (usuarioAlmacenado) {
-        setUsuario(usuarioAlmacenado);
-      }
-    }, []);
-  
+    const { user } = useAuth();
+    const tipoDeUsuario = () => {
+        if (user.rol === 0) {
+            return 'administrador';
+        } else {
+            return 'usuario';
+        }
+    };
+
     return (
-      <div>
-        <Menu/>
-            <Tabs defaultActiveKey="profile" id="fill-tab-example" className="mb-3" fill>
-            <Tab eventKey="home" title="Home">
-                Tab content for Home
-            </Tab>
-            <Tab eventKey="profile" title="Profile">
-                Tab content for Profile
-            </Tab>
-            </Tabs>
-      </div>
+        <div className="wrapper">
+            <Menu/>
+            <main className="content">
+                <div className="container text-center">
+                    <h1 className="title">Perfil</h1>
+                    <div>
+                        <p>Nombre: {user.nombre}</p>
+                        <p>Apellidos: {user.apellidos}</p>
+                        <p>Tipo de usuario: {tipoDeUsuario()}</p>
+                        <p>Sistema: {user.id_sistema}</p>
+                    </div>
+                </div>
+            </main>
+        </div>
     );
 }
 

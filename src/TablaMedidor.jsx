@@ -23,7 +23,7 @@ export function TablaMedidor({ medidorSeleccionado }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/medidor', {});
+        const response = await axios.get(`${process.env.REACT_APP_URL_HTTPS}medidor`, {});
         const responseData = response.data;
 
         const newData = responseData.split('\n').map(jsonString => {

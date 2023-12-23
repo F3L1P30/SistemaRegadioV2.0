@@ -1,4 +1,10 @@
-.mapa{
+/* Estilo para el mapa */
+.mapa {
     width: 100px;
     height: 150px;
-}
+    border: 1px solid #ccc; /* Agrega un borde para mayor claridad */
+    border-radius: 8px; /* Añade bordes redondeados */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Agrega una sombra suave */
+    overflow: hidden; /* Asegura que el contenido no sobresalga del contenedor */
+  }
+  

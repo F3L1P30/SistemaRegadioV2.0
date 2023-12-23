@@ -30,9 +30,21 @@ export const SidebarData = [
     cName: 'nav-text'
   },
   {
+    title: 'Válvula',
+    path: '/Valvula',
+    icon: <Icons5.IoLocationSharp/>,
+    cName: 'nav-text'
+  },
+  {
     title: 'Configuracion',
     path: '/Perfil',
     icon: <FiIcons.FiSettings />,
+    cName: 'nav-text'
+  },
+  {
+    title: 'Cerrar sesión',
+    path: '/InicioSesion',
+    icon: <BiIcons.BiExit />,
     cName: 'nav-text'
   }
 ];

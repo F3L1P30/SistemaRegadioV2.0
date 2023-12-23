@@ -1,24 +1,45 @@
-/* letras.css */
-
 /* Estilo para la sección principal */
 .main-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 50vh; /* Ajusta la altura de acuerdo a tus preferencias (50% del alto de la ventana) */
-  }
-  
-  /* Estilo para el mensaje de bienvenida */
-  .titleI {
-    font-size: 54px; /* Tamaño de fuente deseado */
-    font-weight: bold; /* Fuente en negrita */
-    color: #149329; /* Color de texto deseado */
-  }
-  
-  /* Estilo para el párrafo de agradecimiento */
-  .message {
-    font-size: 20px; /* Tamaño de fuente deseado */
-    color: #666; /* Color de texto deseado */
-  }
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: url('../logo/cultivo.jpg') center/cover no-repeat;
+  margin-left: 0;
+}
+
+/* Estilo para el mensaje de bienvenida */
+.titleI {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #060b83; /* Cambia el color a azul */
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Agrega un resplandor azul */
+}
+
+/* Estilo adicional para centrar las columnas */
+.col-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Fondo borroso semitransparente */
+.main-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.5); /* Ajusta la opacidad según sea necesario */
+  z-index: -1;
+}
+
+.menu{
+  position: relative;
+  z-index: 2;
+}

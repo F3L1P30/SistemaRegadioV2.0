@@ -1,15 +1,29 @@
 .footer {
-  background-color: #ffffff;
-  padding: 10px;
-  color: #ffffff;
+  background-color: #2c3e50; /* Color de fondo más moderno */
+  padding: 20px;
+  color: #ecf0f1; /* Color de texto claro para contraste */
   text-align: center;
   display: flex;
-  justify-content: flex-start; /* Alinea el contenido al comienzo (izquierda) */
-  align-items: center; /* Centra verticalmente el contenido */
+  justify-content: space-between; /* Distribuye el contenido uniformemente */
+  align-items: center;
 }
 
 /* Estilo para el logotipo */
 .logo {
-  max-width: 110px; /* Ajusta el tamaño del logotipo según tus preferencias */
-  margin-top: 10px; /* Ajusta el margen superior según lo necesites */
+  max-width: 80px; /* Ajusta el tamaño del logotipo según tus preferencias */
+  margin-top: 0; /* Elimina el margen superior para un mejor alineamiento */
 }
+
+/* Estilo para los enlaces en el footer */
+.footer a {
+  color: #3498db; /* Color de enlace */
+  text-decoration: none; /* Elimina el subrayado predeterminado */
+  margin: 0 15px; /* Añade espacio entre los enlaces */
+}
+
+/* Aplica un efecto de transición suave a los enlaces */
+.footer a:hover {
+  color: #2980b9;
+  transition: color 0.3s ease-in-out;
+}
+

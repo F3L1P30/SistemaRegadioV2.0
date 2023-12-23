@@ -16,4 +16,4 @@ Un sistema de regadío es una instalación técnica cuya principal función es g
 -Dentro de la pagina:
     -Si la api esta funcionando correctamente y el medidor activo, se deberian recibir datos en tiempo real. Podemos verificar esto en Consumo Electrico y Consumo de agua
 
--Link Pagina: http://162.212.152.155:3000/
+-Link Pagina: http://162.212.52.155:3000/
